@@ -1,6 +1,7 @@
 import streamlit as st
 from archivo import Archivo
 from analizador_lexico import AnalizadorLexico
+from validador_sql import ValidadorSQL
 
 
 class App:
@@ -8,6 +9,7 @@ class App:
     def __init__(self):
         st.set_page_config(page_title="Analizador Lexico", layout="wide")
         self.analizador = AnalizadorLexico()
+        self.validador = ValidadorSQL()
 
     def ejecutar(self):
         st.title("Analizador Lexico con ANTLR y Streamlit")
@@ -26,6 +28,12 @@ class App:
             return
 
         codigo = archivo.leer()
+
+        ##continuacion de la validacion de sql (archivo.py)
+        if not self.validador.validar_sql(codigo):
+            st.error("El contenido del archivo no parece ser SQL válido.")
+            return
+
         info = archivo.obtener_info()
 
         st.subheader("Informacion del archivo")
