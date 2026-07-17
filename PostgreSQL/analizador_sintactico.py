@@ -14,9 +14,11 @@ class ErroresSintacticos(ErrorListener):
 
     # Constructor
     def __init__(self):
-
         # Lista donde guardaremos los errores
         self.lista = []
+
+        #arbol sintactico
+        self.arbol = None
 
     # Metodo que ANTLR ejecuta cuando encuentra error sintactico
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
@@ -68,8 +70,11 @@ class AnalizadorSintactico:
         # Agregamos nuestro capturador de errores
         self.parser.addErrorListener(self.errores)
 
-        # Invocamos la regla principal de la gramatica (root)
-        self.parser.root()
+        #metodo para obtener el arbol je
+        def arbol_sintactico(self):
+            if self.arbol is None:
+                return ""
+            return self.arbol.toStringTree(recog=self.parser)
 
     # Metodo para obtener errores sintacticos
     def obtener_errores(self):
