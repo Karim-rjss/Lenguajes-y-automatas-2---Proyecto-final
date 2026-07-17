@@ -4,7 +4,6 @@ from analizador_lexico import AnalizadorLexico
 from analizador_sintactico import AnalizadorSintactico
 from validador_sql import ValidadorSQL
 
-
 class App:
 
     def __init__(self):
@@ -14,8 +13,8 @@ class App:
         self.validador = ValidadorSQL()
 
     def ejecutar(self):
-        st.title("Analizador Lexico y Sintactico con ANTLR y Streamlit")
-        st.write("Sube un archivo `.sql` para ver tokens y errores.")
+        st.title("Analizador Lexico y Sintactico")
+        st.caption("ANTLR + Streamlit — sube un archivo `.sql` para ver tokens, errores y el arbol sintactico.")
 
         archivo_subido = st.file_uploader("Selecciona tu archivo", type=["sql"])
 
@@ -31,72 +30,80 @@ class App:
 
         codigo = archivo.leer()
 
-        # --- Validacion previa de que el contenido sea SQL ---
+        #validacion sql
         if not self.validador.validar_sql(codigo):
             st.error("El contenido del archivo no parece ser SQL válido.")
             return
 
         info = archivo.obtener_info()
 
-        st.subheader("Informacion del archivo")
-        st.write("Nombre:", info["nombre"])
-        st.write("Extension:", info["extension"])
+        st.divider()
 
-        st.subheader("Codigo original")
-        st.code(codigo, language="text")
+        col_info, col_codigo = st.columns([1, 2])
 
-        # --- Analisis lexico ---
+        with col_info:
+            st.subheader("Archivo")
+            st.write("Nombre:", info["nombre"])
+            st.write("Extension:", info["extension"])
+
+        with col_codigo:
+            st.subheader("Codigo original")
+            st.code(codigo, language="text")
+
+        st.divider()
+
+        #analizador lexico
         self.analizador_lexico.analizar(codigo)
 
         tokens = self.analizador_lexico.obtener_tokens()
         errores_lexicos = self.analizador_lexico.obtener_errores()
 
-        st.subheader("Tokens")
+        st.subheader("Analisis lexico")
 
+        
         if len(tokens) == 0:
             st.warning("No se encontraron tokens")
         else:
             st.dataframe(tokens, use_container_width=True)
 
-        st.subheader("Errores lexicos")
-
         if len(errores_lexicos) == 0:
             st.success("No hay errores lexicos")
         else:
+            st.error("Se encontraron errores lexicos")
             st.dataframe(errores_lexicos, use_container_width=True)
             st.warning("No se ejecuta el analisis sintactico porque hay errores lexicos")
-            return #error lexico = no muestra semantico
+            return  #error lexico = no muestra sintactico ni semantico
 
-        # --- Analisis sintactico ---
+        st.divider()
+
+        #analisis sintactico
         self.analizador_sintactico.analizar(codigo)
 
         errores_sintacticos = self.analizador_sintactico.obtener_errores()
 
-        st.subheader("Errores sintacticos")
+        st.subheader("Analisis sintactico")
 
         if len(errores_sintacticos) == 0:
             st.success("No hay errores sintacticos")
         else:
+            st.error("Se encontraron errores sintacticos")
             st.dataframe(errores_sintacticos, use_container_width=True)
-
-        #arbol sintactico
-        st.subheader("Arbol sintactico")
-
-        if len(errores_sintacticos) == 0:
-            tab_normal, tab_grafico = st.tabs(["Arbol normal", "Arbol identado"])
-
-            with tab_normal:
-                arbol = self.analizador_sintactico.arbol_sintactico()
-                st.code(arbol, language="text")
-
-            with tab_grafico:
-                arbol_identado = self.analizador_sintactico.arbol_identado()
-                st.code(arbol_identado, language="text")
-        else:
             st.warning("No se muestra el arbol porque hay errores sintacticos")
+            return
+
+        tab_normal, tab_identado = st.tabs(["Arbol normal", "Arbol identado"])
+
+        with tab_normal:
+            arbol = self.analizador_sintactico.arbol_sintactico()
+            st.code(arbol, language="text")
+
+        with tab_identado:
+            arbol_identado = self.analizador_sintactico.arbol_identado()
+            st.code(arbol_identado, language="text")
+
+        st.balloons()
 
 
 if __name__ == "__main__":
     app = App()
     app.ejecutar()
-    
