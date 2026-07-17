@@ -64,6 +64,8 @@ class App:
             st.success("No hay errores lexicos")
         else:
             st.dataframe(errores_lexicos, use_container_width=True)
+            st.warning("No se ejecuta el analisis sintactico porque hay errores lexicos")
+            return #error lexico = no muestra semantico
 
         # --- Analisis sintactico ---
         self.analizador_sintactico.analizar(codigo)
