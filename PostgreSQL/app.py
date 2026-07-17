@@ -77,6 +77,15 @@ class App:
         else:
             st.dataframe(errores_sintacticos, use_container_width=True)
 
+        #arbol sintactico
+        st.subheader("Arbol sintactico")
+
+        if len(errores_sintacticos) == 0:
+            arbol = self.analizador_sintactico.arbol_sintactico()
+            st.code(arbol, language="text")
+        else:
+            st.warning("No se puede mostrar el arbol sintactico debido a errores sintacticos.")
+
 
 if __name__ == "__main__":
     app = App()
