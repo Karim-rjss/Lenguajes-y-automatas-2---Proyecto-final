@@ -14,7 +14,6 @@ class ErroresSintacticos(ErrorListener):
 
     # Constructor
     def __init__(self):
-
         # Lista donde guardaremos los errores
         self.lista = []
 
@@ -44,6 +43,8 @@ class AnalizadorSintactico:
         # Variable para guardar los tokens
         self.tokens = None
 
+        self.arbol = None #arbol
+
         # Objeto para guardar errores sintacticos
         self.errores = ErroresSintacticos()
 
@@ -68,11 +69,35 @@ class AnalizadorSintactico:
         # Agregamos nuestro capturador de errores
         self.parser.addErrorListener(self.errores)
 
-        # Invocamos la regla principal de la gramatica (root)
-        self.parser.root()
+        self.arbol = self.parser.root()
 
     # Metodo para obtener errores sintacticos
     def obtener_errores(self):
-        
+
         # Retornamos la lista de errores
         return self.errores.lista
+
+    #metodo del arbol
+    def arbol_sintactico(self):
+        if self.arbol is None:
+            return ""
+        return self.arbol.toStringTree(recog=self.parser)
+    
+    def arbol_identado(self):
+        if self.arbol is None:
+            return ""
+        resultado = []
+
+        def recorrido_nodos(nodo, nivel):
+            from antlr4.tree.Tree import TerminalNode
+            if isinstance(nodo, TerminalNode):
+                texto = nodo.getText()
+                resultado.append("  " * nivel + texto)
+            else:
+                nom_regla = self.parser.ruleNames[nodo.getRuleIndex()]
+                resultado.append("  " * nivel + nom_regla)
+                for i in range(nodo.getChildCount()):
+                    recorrido_nodos(nodo.getChild(i), nivel + 1)
+
+        recorrido_nodos(self.arbol, 0)
+        return "\n".join(resultado)
