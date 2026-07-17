@@ -81,10 +81,17 @@ class App:
         st.subheader("Arbol sintactico")
 
         if len(errores_sintacticos) == 0:
-            arbol = self.analizador_sintactico.arbol_sintactico()
-            st.code(arbol, language="text")
+            tab_normal, tab_grafico = st.tabs(["Arbol normal", "Arbol identado"])
+
+            with tab_normal:
+                arbol = self.analizador_sintactico.arbol_sintactico()
+                st.code(arbol, language="text")
+
+            with tab_grafico:
+                arbol_identado = self.analizador_sintactico.arbol_identado()
+                st.code(arbol_identado, language="text")
         else:
-            st.warning("No se puede mostrar el arbol sintactico debido a errores sintacticos.")
+            st.warning("No se muestra el arbol porque hay errores sintacticos")
 
 
 if __name__ == "__main__":
